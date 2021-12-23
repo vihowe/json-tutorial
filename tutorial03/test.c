@@ -107,7 +107,7 @@ static void test_parse_number() {
 static void test_parse_string() {
     TEST_STRING("", "\"\"");
     TEST_STRING("Hello", "\"Hello\"");
-#if 0
+#if 1
     TEST_STRING("Hello\nWorld", "\"Hello\\nWorld\"");
     TEST_STRING("\" \\ / \b \f \n \r \t", "\"\\\" \\\\ \\/ \\b \\f \\n \\r \\t\"");
 #endif
@@ -189,11 +189,30 @@ static void test_access_null() {
 
 static void test_access_boolean() {
     /* \TODO */
+    lept_value v;
+    lept_init(&v);
+    lept_set_boolean(&v, 1);
+    int ret = lept_get_boolean(&v);
+    EXPECT_TRUE(ret);
+
+    lept_set_boolean(&v, 0);
+    ret = lept_get_boolean(&v);
+    EXPECT_FALSE(ret);
+    lept_free(&v);
+
     /* Use EXPECT_TRUE() and EXPECT_FALSE() */
 }
 
 static void test_access_number() {
     /* \TODO */
+    lept_value v;
+    lept_init(&v);
+    lept_set_number(&v, 1.111);
+    EXPECT_EQ_DOUBLE(1.111, lept_get_number(&v));
+
+    lept_set_number(&v, -0.2e11);
+    EXPECT_EQ_DOUBLE(-0.2e11, lept_get_number(&v));
+    lept_free(&v);
 }
 
 static void test_access_string() {
