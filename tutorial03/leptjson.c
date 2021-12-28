@@ -103,57 +103,25 @@ static int lept_parse_string(lept_context* c, lept_value* v) {
                 c->top = head;
                 return LEPT_PARSE_MISS_QUOTATION_MARK;
             case '\\':
-                if (*p == '"')
-                {
-                    PUTC(c, '"');
-                    p++;
-                    break;
+                switch (*p++) {
+                    case '"': PUTC(c, '"'); break;
+                    case '\\': PUTC(c, '\\'); break;
+                    case '/': PUTC(c, '/'); break;
+                    case 'b': PUTC(c, '\b'); break;
+                    case 'f': PUTC(c, '\f'); break;
+                    case 'n': PUTC(c, '\n'); break;
+                    case 'r': PUTC(c, '\r'); break;
+                    case 't': PUTC(c, '\t'); break;
+                    default:
+                        c->top = head;
+                        return LEPT_PARSE_INVALID_STRING_ESCAPE;
                 }
-                else if (*p == '\\')
-                {
-                    PUTC(c, '\\');
-                    p++;
-                    break;
-                }
-                else if (*p == '/')
-                {
-                    PUTC(c, '/');
-                    p++;
-                    break;
-                }
-                else if (*p == 'b')
-                {
-                    PUTC(c, '\b');
-                    p++;
-                    break;
-                }
-                else if (*p == 'f')
-                {
-                    PUTC(c, '\f');
-                    p++;
-                    break;
-                }
-                else if (*p == 'n')
-                {
-                    PUTC(c, '\n');
-                    p++;
-                    break;
-                }
-                else if (*p == 'r')
-                {
-                    PUTC(c, '\r');
-                    p++;
-                    break;
-                }
-                else if (*p == 't')
-                {
-                    PUTC(c, '\t');
-                    p++;
-                    break;
-                }
-                else
-                    return LEPT_PARSE_INVALID_STRING_ESCAPE;
+                break;
             default:
+                if ((unsigned char)ch < 0x20) {
+                    c->top = head;
+                    return LEPT_PARSE_INVALID_STRING_CHAR;
+                }
                 PUTC(c, ch);
         }
     }
