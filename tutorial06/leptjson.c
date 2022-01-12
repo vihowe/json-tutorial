@@ -128,7 +128,6 @@ static void lept_encode_utf8(lept_context* c, unsigned u) {
 #define STRING_ERROR(ret) do { c->top = head; return ret; } while(0)
 
 static int lept_parse_string_raw(lept_context* c, char** str, size_t* len) {
-    /* \todo */
     size_t head = c->top;
     unsigned u, u2;
     const char* p;
@@ -182,9 +181,9 @@ static int lept_parse_string_raw(lept_context* c, char** str, size_t* len) {
     }
 }
 
-static int lept_parse_string(lept_context *c, lept_value *v) {
+static int lept_parse_string(lept_context* c, lept_value* v) {
     int ret;
-    char *s;
+    char* s;
     size_t len;
     if ((ret = lept_parse_string_raw(c, &s, &len)) == LEPT_PARSE_OK)
         lept_set_string(v, s, len);
@@ -254,9 +253,10 @@ static int lept_parse_object(lept_context* c, lept_value* v) {
     for (;;) {
         char *s;
         lept_init(&m.v);
-        /* \todo parse key to m.k, m.klen */
-        if (*c->json != '\"') {
-            return LEPT_PARSE_MISS_KEY;
+        /* parse key */
+        if (*c->json != '"') {
+            ret = LEPT_PARSE_MISS_KEY;
+            break;
         }
         if ((ret = lept_parse_string_raw(c, &s, &m.klen)) != LEPT_PARSE_OK) {
             break;  /* although parse string failed, also need to free some memory */
@@ -271,14 +271,13 @@ static int lept_parse_object(lept_context* c, lept_value* v) {
         }
         c->json++;
         lept_parse_whitespace(c);
-
         /* parse value */
         if ((ret = lept_parse_value(c, &m.v)) != LEPT_PARSE_OK)
             break;
-        /* store this k-v element into stack */
+        /* store this parsed kv pair to stack */
         memcpy(lept_context_push(c, sizeof(lept_member)), &m, sizeof(lept_member));
         size++;
-//        m.k = NULL; /* ownership is transferred to member on stack */
+        m.k = NULL; /* ownership is transferred to member on stack */
         lept_parse_whitespace(c);
         if (*c->json == ',') {
             c->json++;
@@ -297,7 +296,6 @@ static int lept_parse_object(lept_context* c, lept_value* v) {
             ret = LEPT_PARSE_MISS_COMMA_OR_CURLY_BRACKET;
             break;
         }
-
     }
     /* \todo Pop and free members on the stack */
     free(m.k);
@@ -362,6 +360,7 @@ void lept_free(lept_value* v) {
                 lept_free(&v->u.o.m[i].v);
             }
             free(v->u.o.m);
+            break;
         default: break;
     }
     v->type = LEPT_NULL;
