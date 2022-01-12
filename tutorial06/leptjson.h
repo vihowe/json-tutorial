@@ -19,8 +19,8 @@ struct lept_value {
 };
 
 struct lept_member {
-    char* k; size_t klen;   /* member key string, key string length */
-    lept_value v;           /* member value */
+    char* k; size_t klen;   /* member key string, member key lenght */
+    lept_value v;   /* member value */
 };
 
 enum {
